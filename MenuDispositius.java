@@ -15,7 +15,7 @@ public class MenuDispositius extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_dispositius);
 
-        btn_jugarVarisDispositius.findViewById(R.id.btn_jugar_varis_dispositius);
+        btn_jugarVarisDispositius = findViewById(R.id.btn_jugar_varis_dispositius);
 
 
         btn_jugarVarisDispositius.setOnClickListener(new View.OnClickListener() {

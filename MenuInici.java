@@ -69,7 +69,7 @@ public class MenuInici extends AppCompatActivity {
                     perfil.startAnimation(scaleUp);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     perfil.startAnimation(scaleDown);
-                    //CODE HERE
+                    startActivity(new Intent(MenuInici.this, MenuPerfil.class));
                     return false;
                 }
                 return true;
