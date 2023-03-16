@@ -21,7 +21,7 @@ public class MenuDispositius extends AppCompatActivity {
         btn_jugarVarisDispositius.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MenuDispositius.this, MenuCrearPartida.class));
+                startActivity(new Intent(MenuDispositius.this, MenuSales.class));
             }
         });
 

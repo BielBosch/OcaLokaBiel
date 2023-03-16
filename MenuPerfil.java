@@ -3,11 +3,13 @@ package cat.dam.biel.ocaloka;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -19,6 +21,7 @@ public class MenuPerfil extends AppCompatActivity {
 
     TextView tvUsername;
     TextView tvRegistrationDate;
+    ImageView profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +30,8 @@ public class MenuPerfil extends AppCompatActivity {
 
         tvUsername = findViewById(R.id.nom_jugador_perfil);
         tvRegistrationDate = findViewById(R.id.tv_data_registre_usuari);
+        profileImage = findViewById(R.id.iv_imatge_jugador);
+
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -38,6 +43,11 @@ public class MenuPerfil extends AppCompatActivity {
             String formattedDate = sdf.format(registrationDate);
             String registrationText = getString(R.string.member_since) + " " + formattedDate;
             tvRegistrationDate.setText(registrationText);
+        }
+        if (user.getPhotoUrl() != null) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .into(profileImage);
         }
     }
 }

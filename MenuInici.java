@@ -55,7 +55,7 @@ public class MenuInici extends AppCompatActivity {
                     crearTaulell.startAnimation(scaleUp);
                 } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     crearTaulell.startAnimation(scaleDown);
-                    //CODE HERE
+                    startActivity(new Intent(MenuInici.this, CrearTaulellCaselles.class));
                     return false;
                 }
                 return true;
