@@ -43,9 +43,10 @@ public class Box {
     public void setDescription(String description) {
         this.description = description;
     }
-    public boolean isFilled() {
-        return filled;
-    }
+        public boolean isFilled()
+        {
+            return filled;
+        }
 
     public void setFilled(boolean filled) {
         this.filled = filled;

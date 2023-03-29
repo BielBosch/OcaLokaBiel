@@ -65,9 +65,12 @@ public class GridAdapterCasella extends RecyclerView.Adapter<GridAdapterCasella.
         @Override
         public void onClick(View view) {
 
-                //pasa les dades necesaries al
+                //pasa les dades necesaries altre activity
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("result", box.getImageUrl());
+                resultIntent.putExtra("title", box.getTitle());
+                resultIntent.putExtra("description", box.getDescription());
+                resultIntent.putExtra("filled", true);
                 Context ctx = itemView.getContext();
                 Activity parentActivity = (Activity) ctx;
                 parentActivity.setResult(Activity.RESULT_OK, resultIntent);
@@ -76,7 +79,7 @@ public class GridAdapterCasella extends RecyclerView.Adapter<GridAdapterCasella.
         }
         public void bind(Box box) {
             this.box = box; // store Box object in ViewHolder
-            box_title.setText(box.getTitle());
+            box_title.setText(box.getTitle());//passar titol desc i imatge
             box_description.setText(box.getDescription());
             Picasso.get().load(box.getImageUrl()).into(box_image);
         }

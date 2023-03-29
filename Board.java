@@ -1,24 +1,23 @@
 package cat.dam.biel.ocaloka;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import cat.dam.biel.ocaloka.Box;
 
 public class Board {
     private String name;
-    private Box[] boxes;
+    private List<Box> boxes;
 
     public Board() {
         this.name = name;
-        this.boxes = new Box[25];
-        initializeBoxes();
-    }
-
-    private void initializeBoxes() {
+        this.boxes = new ArrayList<>();
         for (int i = 0; i < 25; i++) {
-            boxes[i] = new Box("", "", "");
+            boxes.add(new Box("", "", ""));
         }
     }
 
-    // Getter and setter methods for the name and boxes properties
     public String getName() {
         return name;
     }
@@ -27,35 +26,29 @@ public class Board {
         this.name = name;
     }
 
-    public Box[] getBoxes() {
+    public List<Box> getBoxes() {
         return boxes;
     }
 
-    public void setBoxes(Box[] boxes) {
-        this.boxes = boxes;
-    }
-    public void fillBox(int index, Box box) {
-        if (!boxes[index].isFilled()) {
-            boxes[index] = box;
-            boxes[index].setFilled(true);
-            if (isBoardFilled()) {
-                // Do something with the filled board, such as saving it to a database
-            }
-        }
+    public Box getBox(int index) {
+        return boxes.get(index);
     }
 
-    public boolean isBoxFilled(int index) {
-        return boxes[index].isFilled();
+    public void setBoxes(List<Box> boxes) {
+        this.boxes = boxes;
     }
-    public boolean isBoardFilled() {
-        for (int i = 0; i < boxes.length; i++) {
-            if (!boxes[i].isFilled()) {
-                return false;
+
+    public void setBox(int index, Box box) {
+        boxes.set(index, box);
+    }
+
+    public int getNumFilledBoxes() {
+        int count = 0;
+        for (int i = 0; i < boxes.size(); i++) {
+            if (boxes.get(i).isFilled()) {
+                count++;
             }
         }
-        return true;
-    }
-    public Box getBox(int index) {
-        return boxes[index];
+        return count;
     }
 }
