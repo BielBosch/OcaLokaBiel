@@ -12,6 +12,8 @@ public class Box {
     private String imageUrl;
     private boolean filled;
 
+    @SuppressWarnings("unused")
+    public Box(){}
     public Box(String title, String description, String imageUrl) {
         this.title = title;
         this.description = description;

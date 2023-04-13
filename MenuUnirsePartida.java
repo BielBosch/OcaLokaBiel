@@ -9,9 +9,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class MenuUnirsePartida extends AppCompatActivity {
 
@@ -41,11 +45,25 @@ public class MenuUnirsePartida extends AppCompatActivity {
 
     private void unirPartida(String nom_partida) {
         DatabaseReference partidaRef = mDatabase.child("games").child(nom_partida);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String nom_jugador = user.getDisplayName();
+        Player jugador = new Player(nom_jugador);
+
         partidaRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot partidaSnapshot = task.getResult();
                 if (partidaSnapshot.exists()) {
-                    // Game matched correctly, go to lobby
+                    // Game matched correctly, add user to player list
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    DatabaseReference playerListRef = partidaRef.child("players");
+                    HashMap<String, Object> jugadorData = new HashMap<>();
+                    jugadorData.put("name", jugador.getName());
+                    jugadorData.put("actualPosition", jugador.getActualPosition());
+                    jugadorData.put("isOwner", jugador.isOwner());
+                    jugadorData.put("color", jugador.getColor());
+                    playerListRef.child(uid).setValue(jugadorData); // Add user to player list
+
+                    // Go to lobby
                     Intent intent = new Intent(MenuUnirsePartida.this, MenuCrearPartida.class);
                     intent.putExtra("nom_partida", nom_partida);
                     startActivity(intent);

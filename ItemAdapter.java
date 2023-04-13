@@ -29,7 +29,7 @@ public class ItemAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return fitxesNoms[i];
     }
 
     @Override
