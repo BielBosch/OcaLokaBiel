@@ -126,20 +126,22 @@ public class SeleccionarTaulell extends AppCompatActivity implements AdapterView
         DatabaseReference partidaRef = mDatabase.child("games").child(nom_partida);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String nom_jugador = user.getDisplayName();
-        Player jugador = new Player(nom_jugador);
+        String email_jugador = user.getEmail(); // Get the email of the logged-in user
+        Player jugador = new Player(nom_jugador, email_jugador); // Pass the name and email to Player constructor
 
         partidaRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot partidaSnapshot = task.getResult();
                 if (partidaSnapshot.exists()) {
-                    // Partida trobada correctament, afegir el jugador a la partida
+                    // Partida trobada correctament, afegir el jugador que la creat a la partida
+                    jugador.setOwner(true); //posem a true owner perque es el que a creat la partida
                     String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     DatabaseReference playerListRef = partidaRef.child("players");
                     HashMap<String, Object> jugadorData = new HashMap<>();
                     jugadorData.put("name", jugador.getName());
                     jugadorData.put("actualPosition", jugador.getActualPosition());
                     jugadorData.put("isOwner", jugador.isOwner());
-                    jugadorData.put("color", jugador.getColor());
+                    jugadorData.put("email", jugador.getEmail());
                     playerListRef.child(uid).setValue(jugadorData); // Add player data to player list
 
                     // Anar al lobby

@@ -1,11 +1,15 @@
 package cat.dam.biel.ocaloka;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,19 +17,26 @@ import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,19 +51,25 @@ public class MenuCrearPartida extends AppCompatActivity {
     private TextView jugador3_name;
     private TextView jugador4_name;
     private TextView jugador5_name;
+    private TextView tv_waiting_players;
+    private LinearLayout linear_layout_jugadors;
+    private Button btn_jugar_crearpartida;
+    private ProgressBar loadingProgressBar;
+    private ImageView iv_imatge_jugador1,iv_imatge_jugador2,iv_imatge_jugador3,iv_imatge_jugador4,iv_imatge_jugador5;
+    private ImageView creuJugador2,creuJugador3,creuJugador4,creuJugador5;
+    private DatabaseReference playersRef;
+    private String gameName;
 
     Spinner spinner, spinner2, spinner3, spinner4, spinner5;
     String[] fitxesNoms;
     int[] fitxesIcons;
-    Button btn_jugar_crearpartida;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_partida);
-
-        String gameName = getIntent().getStringExtra("nom_partida");
+        playersRef = FirebaseDatabase.getInstance().getReference().child("players");
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -65,6 +82,25 @@ public class MenuCrearPartida extends AppCompatActivity {
         jugador4_name = findViewById(R.id.jugador4_name);
         jugador5_name = findViewById(R.id.jugador5_name);
 
+        //initialize imageviews
+
+        iv_imatge_jugador1 = findViewById(R.id.iv_imatge_jugador1);
+        iv_imatge_jugador2 = findViewById(R.id.iv_imatge_jugador2);
+        iv_imatge_jugador3 = findViewById(R.id.iv_imatge_jugador3);
+        iv_imatge_jugador4 = findViewById(R.id.iv_imatge_jugador4);
+        iv_imatge_jugador5 = findViewById(R.id.iv_imatge_jugador5);
+
+        //creus
+        creuJugador2 = findViewById(R.id.iv_imatge_icona2);
+        creuJugador3 = findViewById(R.id.iv_imatge_icona3);
+        creuJugador4 = findViewById(R.id.iv_imatge_icona4);
+        creuJugador5 = findViewById(R.id.iv_imatge_icona5);
+
+
+        //initialize layouts
+        tv_waiting_players = findViewById(R.id.tv_waiting_players);
+        linear_layout_jugadors = findViewById(R.id.linear_layout_jugadors);
+        btn_jugar_crearpartida = findViewById(R.id.btn_jugar_crearpartida);
 
         // Initialize the spinner
         spinner = findViewById(R.id.spinner_fitxes);
@@ -83,20 +119,37 @@ public class MenuCrearPartida extends AppCompatActivity {
         spinner3.setAdapter(adapter);
         spinner4.setAdapter(adapter);
         spinner5.setAdapter(adapter);
-        String name = getIntent().getStringExtra("nom_partida");
-        updatePlayerNameFromFirebase();
 
+        loadingProgressBar = findViewById(R.id.loadingProgressBar);
+
+
+        afegirNomJugador();
 
         btn_jugar_crearpartida.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                comprovarTriarFitxes();
+                //comprovarTriarFitxes();
 
+                //enviar el nom de la partida a partida.class
+                Intent intent = new Intent(MenuCrearPartida.this, Partida.class);
+                intent.putExtra("nom_partida", gameName);
+                startActivity(intent);
+
+            }
+        });
+
+        creuJugador2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                esborrarJugador();
             }
         });
     }
 
     private void comprovarTriarFitxes() {
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = user.getUid();
         // create an array to store the selected items
         String[] selectedItems = new String[]{
                 (String) spinner.getSelectedItem(),
@@ -110,46 +163,116 @@ public class MenuCrearPartida extends AppCompatActivity {
         Set<String> set = new HashSet<>(Arrays.asList(selectedItems));
         if (set.size() == selectedItems.length) {
             // fitxa ben triada, canviem de activitys
-            // Update "Jugador 1", "Jugador 2", etc. with usernames of players
-            for (int i = 0; i < selectedItems.length; i++) {
-                mDatabase.child("jugador" + (i + 1)).setValue(selectedItems[i]);
-            }
-            //startActivity(new Intent(MenuCrearPartida.this, SeleccionarTaulell.class));
+            DatabaseReference playerRef = mDatabase.child("games").child(getIntent().getStringExtra("nom_partida")).child("players").child(userId);
+            playerRef.child("color").setValue(selectedItems[0]); //primer spinner
         } else {
             // fitxa duplicada
             Toast.makeText(MenuCrearPartida.this, "Cada jugador ha de triar una fitxa diferent", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void updatePlayerNameFromFirebase() {
-        // Get the current user from Firebase Authentication
+
+    private void afegirNomJugador() {
+
+
+        gameName = getIntent().getStringExtra("nom_partida");
+        DatabaseReference playersRef = mDatabase.child("games").child(gameName).child("players");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userId = user.getUid();
 
-        String gameName = getIntent().getStringExtra("nom_partida");
-        // Get a reference to the "players" node in Firebase Realtime Database
-        DatabaseReference playersRef = mDatabase.child("games").child("nomPartida").child("players").child(userId);
 
-        Toast.makeText(MenuCrearPartida.this, userId + "  PLAYERNAME", Toast.LENGTH_SHORT).show();
 
-        // Add a ValueEventListener to listen for changes in the player's name
         playersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Get the player's name from the DataSnapshot
-                String playerName = dataSnapshot.child("name").getValue(String.class);
-                Toast.makeText(MenuCrearPartida.this, playerName + "  PLAYERNAME", Toast.LENGTH_SHORT).show();
+                if (dataSnapshot.exists()) {
+                    ArrayList<String> playerNames = new ArrayList<>();
+                    boolean isOwner = false;
 
-                // Update the TextView for player's name with the retrieved value
-                jugador1_name.setText(playerName);
-                Toast.makeText(MenuCrearPartida.this,gameName, Toast.LENGTH_SHORT).show();
+                    for (DataSnapshot playerSnapshot : dataSnapshot.getChildren()) {
+                        String playerName = playerSnapshot.child("name").getValue(String.class);
+                        boolean isCreator = playerSnapshot.child("isOwner").getValue(Boolean.class);
 
+                        if (playerSnapshot.getKey().equals(userId) && isCreator) {
+                            // Check if the player is the creator based on isOwner field
+                            // Set the player's name in the TextView for creator
+                            jugador1_name.setText(playerName.substring(0, Math.min(playerName.length(), 8)));
+                            //pasar la foto de perfil
+                            posarFotoPerfil(user,iv_imatge_jugador1);
+
+                            isOwner = true;
+                        } else {
+                            playerNames.add(playerName);
+                        }
+                    }
+
+                    if (isOwner) {
+                        // Update the TextViews with player names for other players
+                        if (!playerNames.isEmpty()) {
+                            if (playerNames.size() >= 1) {
+                                jugador2_name.setText(playerNames.get(0).substring(0, Math.min(playerNames.get(0).length(), 8)));
+
+                            }
+                            if (playerNames.size() >= 2) {
+                                jugador3_name.setText(playerNames.get(1).substring(0, Math.min(playerNames.get(1).length(), 8)));
+
+                            }
+                            if (playerNames.size() >= 3) {
+                                jugador4_name.setText(playerNames.get(2).substring(0, Math.min(playerNames.get(2).length(), 8)));
+                            }
+                            if (playerNames.size() >= 4) {
+                                jugador5_name.setText(playerNames.get(3).substring(0, Math.min(playerNames.get(3).length(), 8)));
+
+                            }
+                        }
+                            vistaOwner();
+                    } else {
+
+                        vistaJugadorNormal(playerNames);
+                    }
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d("FirebaseError", "Failed to read player's name from Firebase.", databaseError.toException());
+                Log.d("FirebaseError", "Failed to read player names from Firebase.", databaseError.toException());
             }
         });
+    }
+
+    public void vistaOwner(){
+        // Hide the waiting players TextView and progress bar
+        tv_waiting_players.setVisibility(View.GONE);
+        loadingProgressBar.setVisibility(View.GONE);
+        // Show the lobby players LinearLayout
+        btn_jugar_crearpartida.setVisibility(View.VISIBLE);
+        linear_layout_jugadors.setVisibility(View.VISIBLE);
+    }
+
+    public void vistaJugadorNormal(ArrayList<String> playerNames){
+        // Show the waiting players TextView and progress bar
+        tv_waiting_players.setText("Esperant a l'anfitrió : " + playerNames.size() +"/5");
+        tv_waiting_players.setVisibility(View.VISIBLE);
+        loadingProgressBar.setVisibility(View.VISIBLE);
+        loadingProgressBar.setIndeterminate(true);
+        btn_jugar_crearpartida.setVisibility(View.GONE);
+        linear_layout_jugadors.setVisibility(View.GONE);
+    }
+
+    public void posarFotoPerfil (FirebaseUser user, ImageView iv_imatge) {
+        Uri photoUrl = user.getPhotoUrl();
+        if (photoUrl != null) {
+            Glide.with(getApplicationContext())
+                    .load(photoUrl)
+                    .into(iv_imatge);
+        }
+    }
+
+    public void esborrarJugador() {
+        DatabaseReference playersRef = FirebaseDatabase.getInstance().getReference().child("prova").child("players");
+        String playerKey = "97VnnUI5XyUYZ7Vi2NCZpUTK0Fo1"; // replace with the actual key of the player you want to remove
+        playersRef.child(playerKey).removeValue();
+        Toast.makeText(MenuCrearPartida.this, " clicked" + playersRef, Toast.LENGTH_SHORT).show();
+
     }
 }

@@ -11,6 +11,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class MenuInici extends AppCompatActivity {
 
     Button crearTaulell,sortir,jugar,perfil;
@@ -79,14 +81,12 @@ public class MenuInici extends AppCompatActivity {
         sortir.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    sortir.startAnimation(scaleUp);
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     sortir.startAnimation(scaleDown);
-                    finish();
-                    return false;
+                    FirebaseAuth.getInstance().signOut(); // This line signs out the user
+                    onBackPressed();
                 }
-                return true;
+                return false;
             }
         });
     }

@@ -47,20 +47,21 @@ public class MenuUnirsePartida extends AppCompatActivity {
         DatabaseReference partidaRef = mDatabase.child("games").child(nom_partida);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String nom_jugador = user.getDisplayName();
-        Player jugador = new Player(nom_jugador);
+        String email_jugador = user.getEmail();
+        Player jugador = new Player(nom_jugador, email_jugador); // Passam nom i email al jugador
 
         partidaRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot partidaSnapshot = task.getResult();
                 if (partidaSnapshot.exists()) {
-                    // Game matched correctly, add user to player list
+                    // Partida trobada, afegim las dades al firebase
                     String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     DatabaseReference playerListRef = partidaRef.child("players");
                     HashMap<String, Object> jugadorData = new HashMap<>();
                     jugadorData.put("name", jugador.getName());
                     jugadorData.put("actualPosition", jugador.getActualPosition());
                     jugadorData.put("isOwner", jugador.isOwner());
-                    jugadorData.put("color", jugador.getColor());
+                    jugadorData.put("email", jugador.getEmail());
                     playerListRef.child(uid).setValue(jugadorData); // Add user to player list
 
                     // Go to lobby
@@ -68,11 +69,9 @@ public class MenuUnirsePartida extends AppCompatActivity {
                     intent.putExtra("nom_partida", nom_partida);
                     startActivity(intent);
                 } else {
-                    // Game not found, show toast
                     Toast.makeText(MenuUnirsePartida.this, "Partida no trobada", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                // Error getting game data, show toast
                 Toast.makeText(MenuUnirsePartida.this, "Error al obtenir dades de la partida", Toast.LENGTH_SHORT).show();
             }
         });

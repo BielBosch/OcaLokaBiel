@@ -1,6 +1,7 @@
 package cat.dam.biel.ocaloka;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -17,15 +18,22 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.InputStream;
 
 public class IniciGoogle extends AppCompatActivity {
 
+    public static final int REQUEST_CODE_INT = 1234;
     private GoogleSignInClient client;
     private TextView tvUsername;
 
@@ -50,7 +58,7 @@ public class IniciGoogle extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent i = client.getSignInIntent();
-                startActivityForResult(i,1234);
+                startActivityForResult(i,REQUEST_CODE_INT);
 
             }
         });
@@ -60,7 +68,7 @@ public class IniciGoogle extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == 1234){
+        if(requestCode == REQUEST_CODE_INT){
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);

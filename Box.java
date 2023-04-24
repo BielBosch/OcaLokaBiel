@@ -53,4 +53,9 @@ public class Box {
     public void setFilled(boolean filled) {
         this.filled = filled;
     }
+    @Override
+    public String toString() {
+        return "Box [title=" + title + ", description=" + description + ", imageUrl=" + imageUrl + ", filled=" + filled + "]";
+    }
+
 }

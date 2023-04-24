@@ -2,13 +2,15 @@ package cat.dam.biel.ocaloka;
 
 public class Player {
     private String name;
+    private String email; // New field for email
     private int actualPosition;
     private boolean isOwner;
-    private String color; // New attribute for color
+    private String color; // New field for color
 
     // Constructor
-    public Player(String name) {
+    public Player(String name, String email) {
         this.name = name;
+        this.email = email;
         this.actualPosition = 0;
         this.isOwner = false;
     }
@@ -16,6 +18,10 @@ public class Player {
     // Getters and setters
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public int getActualPosition() {
@@ -41,5 +47,4 @@ public class Player {
     public void setColor(String color) {
         this.color = color;
     }
-
 }

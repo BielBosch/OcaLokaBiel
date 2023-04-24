@@ -181,7 +181,7 @@ public class CrearTaulell extends AppCompatActivity {
 
             boardData.put("boxes", boxList);
 
-            if (board.getNumFilledBoxes() == 2) { //guardar tauler al firebase i mostar boto
+            if (board.getNumFilledBoxes() == 25) { //guardar tauler al firebase i mostar boto
 
                 Toast.makeText(this, String.valueOf(board.getNumFilledBoxes()), Toast.LENGTH_SHORT).show();
                 ll_guardar_taulell.setVisibility(View.VISIBLE);
