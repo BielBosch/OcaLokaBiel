@@ -89,11 +89,11 @@ public class Partida extends AppCompatActivity {
         Dice dice = new Dice();
         loadPieces();
 
-        lilaPieceList.get(21).setVisibility(View.GONE);
-        blauPieceList.get(11).setVisibility(View.GONE);
-        grocPieceList.get(14).setVisibility(View.GONE);
-        varmellPieceList.get(16).setVisibility(View.GONE);
-        verdPieceList.get(12).setVisibility(View.GONE);
+        lilaPieceList.get(0).setVisibility(View.VISIBLE);
+        blauPieceList.get(0).setVisibility(View.VISIBLE);
+        grocPieceList.get(0).setVisibility(View.VISIBLE);
+        varmellPieceList.get(0).setVisibility(View.VISIBLE);
+        verdPieceList.get(0).setVisibility(View.VISIBLE);
 
 
     }
@@ -188,7 +188,7 @@ public class Partida extends AppCompatActivity {
                         1f));
                 imageView.setAdjustViewBounds(true);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                imageView.setVisibility(View.VISIBLE);
+                imageView.setVisibility(View.GONE);
 
                 switch (j) {
                     case 0:

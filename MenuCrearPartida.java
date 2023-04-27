@@ -130,8 +130,14 @@ public class MenuCrearPartida extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 comprovarTriarFitxes();
+                //posar value a true
 
+                String gameName = getIntent().getStringExtra("nom_partida");
+                DatabaseReference gameRef = FirebaseDatabase.getInstance().getReference("games").child(gameName);
+                DatabaseReference startedRef = gameRef.child("started");
 
+                // Set the value of "started" to true
+                startedRef.setValue(true);
             }
         });
 
@@ -185,12 +191,6 @@ public class MenuCrearPartida extends AppCompatActivity {
                     // fitxa duplicada
                     Toast.makeText(MenuCrearPartida.this, "Cada jugador ha de triar una fitxa diferent", Toast.LENGTH_SHORT).show();
 
-
-                    //BORRARO DESPRES ES PER FER PROVES
-                    Intent intent = new Intent(MenuCrearPartida.this, Partida.class);
-                    intent.putExtra("nom_partida", gameName);
-                    startActivity(intent);
-
                 }
             }
 
@@ -201,102 +201,6 @@ public class MenuCrearPartida extends AppCompatActivity {
         });
     }
 
-
-    /*
-    private void afegirNolmJugador() {
-        String gameName = getIntent().getStringExtra("nom_partida");
-        DatabaseReference playersRef = mDatabase.child("games").child(gameName).child("players");
-        DatabaseReference gameRef = mDatabase.child("games").child(gameName);
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userId = user.getUid();
-
-        gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    List<String> playerIds = new ArrayList<>();
-                    for (DataSnapshot playerSnapshot : dataSnapshot.child("players").getChildren()) {
-                        String playerId = playerSnapshot.getKey();
-                        playerIds.add(playerId);
-                    }
-
-                    playersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                ArrayList<String> playerNames = new ArrayList<>();
-                                boolean isOwner = false;
-
-                                for (DataSnapshot playerSnapshot : dataSnapshot.getChildren()) {
-                                    String playerName = playerSnapshot.child("name").getValue(String.class);
-                                    boolean isCreator = playerSnapshot.child("isOwner").getValue(Boolean.class);
-
-                                    System.out.println("KEY OWNER"+playerSnapshot.getKey());
-                                    System.out.println("USER ID"+userId);
-
-
-                                    if (playerSnapshot.getKey().equals(userId) && isCreator) {
-                                        // Check if the player is the creator based on isOwner field
-                                        // Set the player's name in the TextView for creator
-                                        System.out.println("DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE DINTRE");
-
-
-                                        jugador1_name.setText(playerName.substring(0, Math.min(playerName.length(), 8)));
-                                        //pasar la foto de perfil
-                                        posarFotoPerfilOwner(user, iv_imatge_jugador1);
-                                        isOwner = true;
-
-                                    } else {
-                                        playerNames.add(playerName);
-                                    }
-                                }
-
-                                System.out.println("playerNames.size()  "+playerNames.size() + playerNames);
-                                System.out.println("playerIDS  "+playerIds.size() + playerIds);
-                                System.out.println(isOwner);
-                                if (isOwner) {
-                                    // Update the TextViews with player names for other players
-                                        if (playerNames.size() >= 1) {
-                                            jugador2_name.setText(playerNames.get(0).substring(0, Math.min(playerNames.get(0).length(), 8)));
-                                            posarFotoPerfil(playerIds.get(0), iv_imatge_jugador2);
-                                            System.out.println("1");
-                                        }
-                                        if (playerNames.size() >= 2) {
-                                            jugador3_name.setText(playerNames.get(1).substring(0, Math.min(playerNames.get(1).length(), 8)));
-                                            posarFotoPerfil(playerIds.get(1), iv_imatge_jugador3);
-                                            System.out.println("2");
-                                        }
-                                        if (playerNames.size() >= 3) {
-                                            jugador4_name.setText(playerNames.get(2).substring(0, Math.min(playerNames.get(2).length(), 8)));
-                                            posarFotoPerfil(playerIds.get(2), iv_imatge_jugador4);
-                                        }
-                                        if (playerNames.size() >= 4) {
-                                            jugador5_name.setText(playerNames.get(3).substring(0, Math.min(playerNames.get(3).length(), 8)));
-                                            posarFotoPerfil(playerIds.get(3), iv_imatge_jugador5);
-                                        }
-
-                                    vistaOwner();
-                                } else {
-                                    vistaJugadorNormal(playerNames);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Log.d("FirebaseError", "Failed to read player names from Firebase.", databaseError.toException());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d("FirebaseError", "Failed to read player names from Firebase.", databaseError.toException());
-            }
-        });
-    }
-*/
 
     private void afegirNomJugador() {
 
@@ -383,6 +287,30 @@ public class MenuCrearPartida extends AppCompatActivity {
         loadingProgressBar.setIndeterminate(true);
         btn_jugar_crearpartida.setVisibility(View.GONE);
         linear_layout_jugadors.setVisibility(View.GONE);
+
+        DatabaseReference gamesRef = mDatabase.child("games");
+        gamesRef.child(gameName).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //Fins que aquest valor no sigui true no entro a la partida.
+                //carregar acativity partida
+                //si isStarted es igual igual a true llençar lactivity
+                boolean isStarted = snapshot.child("started").getValue(Boolean.class);
+                if (isStarted == true) {
+
+                    //seguent pantalla
+                    Intent intent = new Intent(MenuCrearPartida.this, Partida.class);
+                    intent.putExtra("nom_partida", gameName);
+                    startActivity(intent);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     public void posarFotoPerfilOwner (FirebaseUser user, ImageView iv_imatge) {
@@ -394,24 +322,6 @@ public class MenuCrearPartida extends AppCompatActivity {
         }
     }
 
-    /*
-    public void posarFotoPerfil(String userId, ImageView iv_imatge) {
-
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            String currentUserId = user.getUid();
-            if (currentUserId.equals(userId)) {
-                Uri photoUrl = user.getPhotoUrl();
-                if (photoUrl != null) {
-                    Glide.with(getApplicationContext())
-                            .load(photoUrl)
-                            .into(iv_imatge);
-                }
-            }
-        }
-    }
-*/
 
     public void esborrarJugador() {
         DatabaseReference playersRef = FirebaseDatabase.getInstance().getReference().child("prova").child("players");

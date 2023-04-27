@@ -72,18 +72,21 @@ public class MenuSales extends AppCompatActivity {
                         } else {
                             //  Si no crea la partida i li assigna el nom
                             Game game = new Game(name);
+                            game.setStarted(false); // Set isStarted value to false
+                            // creaem la partida amb el board game.currentPlayerIndex i Game.name i Game.isStarted
                             gamesRef.child(name).setValue(game);
                             Intent i = new Intent(MenuSales.this, SeleccionarTaulell.class);
                             String nom_partida = name;
                             i.putExtra("nom_partida", nom_partida);
                             startActivity(i);
 
-                            }
+                        }
                     } else {
                         Toast.makeText(MenuSales.this, "Error al obtenir dades de la partida", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
+
     }
 }
