@@ -4,6 +4,7 @@ public class Player {
     private String name;
     private String email; // New field for email
     private int actualPosition;
+    private int posicioAnterior;
     private boolean isOwner;
     private String color; // New field for color
 
@@ -46,5 +47,13 @@ public class Player {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public int getPosicioAnterior() {
+        return posicioAnterior;
+    }
+
+    public void setPosicioAnterior(int posicioAnterior) {
+        this.posicioAnterior = posicioAnterior;
     }
 }

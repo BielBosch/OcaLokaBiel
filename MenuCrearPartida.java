@@ -38,10 +38,8 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class MenuCrearPartida extends AppCompatActivity {
@@ -144,7 +142,6 @@ public class MenuCrearPartida extends AppCompatActivity {
         creuJugador2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                esborrarJugador();
             }
         });
     }
@@ -322,13 +319,5 @@ public class MenuCrearPartida extends AppCompatActivity {
         }
     }
 
-
-    public void esborrarJugador() {
-        DatabaseReference playersRef = FirebaseDatabase.getInstance().getReference().child("prova").child("players");
-        String playerKey = "97VnnUI5XyUYZ7Vi2NCZpUTK0Fo1"; // replace with the actual key of the player you want to remove
-        playersRef.child(playerKey).removeValue();
-        Toast.makeText(MenuCrearPartida.this, " clicked" + playersRef, Toast.LENGTH_SHORT).show();
-
-    }
 
 }

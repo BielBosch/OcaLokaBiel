@@ -140,6 +140,7 @@ public class SeleccionarTaulell extends AppCompatActivity implements AdapterView
                     HashMap<String, Object> jugadorData = new HashMap<>();
                     jugadorData.put("name", jugador.getName());
                     jugadorData.put("actualPosition", jugador.getActualPosition());
+                    jugadorData.put("posicioAnterior", jugador.getPosicioAnterior());
                     jugadorData.put("isOwner", jugador.isOwner());
                     jugadorData.put("email", jugador.getEmail());
                     playerListRef.child(uid).setValue(jugadorData); // Add player data to player list

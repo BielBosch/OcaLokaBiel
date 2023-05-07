@@ -10,6 +10,9 @@ public class Game {
     private int currentPlayerIndex;
     private boolean isStarted;
 
+    @SuppressWarnings("unused")
+    public Game(){}
+
     public Game(String name) {
         this.name = name;
         players = new ArrayList<>();
@@ -21,6 +24,10 @@ public class Game {
     public String getName() {
         return name;
     }
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     public List<Player> getPlayers() {
         return players;
